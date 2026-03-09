@@ -1,30 +1,9 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Source_Serif_4, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
-  style: ["normal", "italic"]
-});
-
-const sourceSerif = Source_Serif_4({
-  variable: "--font-source-serif",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"]
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains",
-  subsets: ["latin"],
-  weight: ["400", "700"]
-});
-
 export const metadata: Metadata = {
-  title: "ATS Resume Generator",
-  description: "AI-powered custom ATS resume generator.",
+  title: "Currículo Maker — ATS Resume Generator",
+  description: "Motor de otimização de currículos com IA para burlar filtros ATS.",
 };
 
 export default function RootLayout({
@@ -33,8 +12,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${playfair.variable} ${sourceSerif.variable} ${jetbrainsMono.variable}`}>
+    <html lang="pt-BR">
+      <body className="antialiased min-h-screen flex flex-col">
         {children}
       </body>
     </html>
