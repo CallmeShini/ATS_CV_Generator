@@ -119,10 +119,9 @@ export default function MatchPage() {
             };
         }));
 
-        // Sort by final Hybrid Score
+        // Sort by final Hybrid Score, but DO NOT slice (Additive Matcher principle: we keep the user's whole life path, just sort it to highlight relevance)
         const topExperiences = semanticallyScored
             .sort((a, b) => b.finalHybridScore - a.finalHybridScore)
-            .slice(0, 4)
             .map(item => ({
                 ...item.experience,
                 _matchAnalysis: `Hybrid Score: ${item.finalHybridScore} pts | TF: ${item.score} | Semantic: ${item.semanticSimilarity}. Hits: [${item.matchedKeywords.join(", ")}]`
@@ -130,8 +129,10 @@ export default function MatchPage() {
 
         const resultPayload = {
             target_role: profile.target_positioning,
+            professional_summary: profile.professional_summary_base, // Inject Additive Summary
             keywords_detected: finalSkills,
-            selected_skills: finalSkills,
+            // Additive Skills Principle: Keep user's default stack, but prepend the explicitly matched JD keywords
+            selected_skills: Array.from(new Set([...finalSkills, ...profile.technologies_possible])),
             selected_experiences: topExperiences,
             education: profile.education,
             projects_selected: profile.project_bank,

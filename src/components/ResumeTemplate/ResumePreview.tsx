@@ -57,6 +57,16 @@ export default function ResumePreview({ data, masterData }: ResumePreviewProps) 
                     </div>
                 </header>
 
+                {/* Professional Summary */}
+                {(data.professional_summary || masterData.professional_summary_base) && (
+                    <section className={styles.section}>
+                        <h2 className={styles.sectionTitle}>Summary</h2>
+                        <p style={{ fontSize: "0.95rem", lineHeight: "1.5", marginTop: "0.5rem" }}>
+                            {data.professional_summary || masterData.professional_summary_base}
+                        </p>
+                    </section>
+                )}
+
                 {/* Core Skills & Tech Stack */}
                 <section className={styles.section}>
                     <h2 className={styles.sectionTitle}>Skills</h2>
