@@ -1,17 +1,25 @@
 import type { Metadata } from "next";
-import { Kalam, Patrick_Hand } from "next/font/google";
+import { Playfair_Display, Source_Serif_4, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const kalam = Kalam({
-  variable: "--font-kalam",
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
   subsets: ["latin"],
-  weight: "700"
+  weight: ["400", "500", "600", "700", "800", "900"],
+  style: ["normal", "italic"]
 });
 
-const patrickHand = Patrick_Hand({
-  variable: "--font-patrick",
+const sourceSerif = Source_Serif_4({
+  variable: "--font-source-serif",
   subsets: ["latin"],
-  weight: "400"
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"]
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains",
+  subsets: ["latin"],
+  weight: ["400", "700"]
 });
 
 export const metadata: Metadata = {
@@ -26,7 +34,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${kalam.variable} ${patrickHand.variable}`}>
+      <body className={`${playfair.variable} ${sourceSerif.variable} ${jetbrainsMono.variable}`}>
         {children}
       </body>
     </html>
