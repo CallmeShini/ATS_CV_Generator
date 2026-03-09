@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useMasterProfile } from "../../store/useMasterProfile";
 import { PRELOADED_SKILLS } from "../../constants/skills";
+import { advancedMatch, MatchScore } from "../../utils/matcherAlgorithm";
 import styles from "../generate/page.module.css";
 import profileStyles from "../profile/page.module.css";
 
@@ -19,66 +20,30 @@ export default function MatchPage() {
     const generateMatch = () => {
         setIsGenerating(true);
         setTimeout(() => {
-            const jdLower = jobDescription.toLowerCase();
-
-            // 1. Match skills
-            const matchedSkills = new Set<string>();
-
-            // Check against user's specific technologies
-            profile.technologies_possible.forEach(skill => {
-                if (jdLower.includes(skill.toLowerCase())) {
-                    matchedSkills.add(skill);
-                }
-            });
-
-            // Check against preloaded canonical skills
-            allPreloadedSkills.forEach(skill => {
-                if (jdLower.includes(skill.toLowerCase())) {
-                    matchedSkills.add(skill);
-                }
-            });
-
-            const finalSkillsList = Array.from(matchedSkills);
-
-            // 2. Score and select top experiences
-            const scoredExperiences = profile.experience_master.map(exp => {
-                let score = 0;
-                const expText = [
-                    exp.role,
-                    exp.description,
-                    ...exp.technologies,
-                    ...exp.achievements
-                ].join(" ").toLowerCase();
-
-                // Simple keyword density matching
-                finalSkillsList.forEach(skill => {
-                    const skillLower = skill.toLowerCase();
-                    if (expText.includes(skillLower)) {
-                        score += 3; // Give high weight if the experience mentions the required skill
-                    }
-                });
-
-                if (jdLower.includes(exp.role.toLowerCase())) {
-                    score += 10;
-                }
-
-                return { ...exp, _score: score };
-            });
+            const { finalSkills, scoredExperiences } = advancedMatch(
+                jobDescription,
+                profile.technologies_possible,
+                allPreloadedSkills,
+                profile.experience_master
+            );
 
             // Sort by score and take the top ones (or all if they have some relevance, let's say max 4 for a 1-pager)
-            const selectedExperiences = scoredExperiences
-                .sort((a, b) => b._score - a._score)
+            const topExperiences = scoredExperiences
+                .sort((a: MatchScore, b: MatchScore) => b.score - a.score)
                 .slice(0, 4)
-                .map(({ _score, ...rest }) => rest);
+                .map((item: MatchScore) => ({
+                    ...item.experience,
+                    _matchAnalysis: `Score: ${item.score} pts. Hits: [${item.matchedKeywords.join(", ")}]`
+                }));
 
             const resultPayload = {
-                target_role: profile.target_positioning, // This could be extracted from JD, using base for now
-                keywords_detected: finalSkillsList,
-                selected_skills: finalSkillsList,
-                selected_experiences: selectedExperiences,
+                target_role: profile.target_positioning,
+                keywords_detected: finalSkills,
+                selected_skills: finalSkills,
+                selected_experiences: topExperiences,
                 optimization_notes: [
-                    `Matched ${finalSkillsList.length} total keywords from JD.`,
-                    `Selected top ${selectedExperiences.length} experiences based on density.`
+                    `Advanced Scan: Matched ${finalSkills.length} total keywords from JD avoiding acronym mismatch.`,
+                    `Selected top ${topExperiences.length} experiences based on Term Frequency (TF) density weights.`
                 ]
             };
 
