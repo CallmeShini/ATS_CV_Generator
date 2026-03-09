@@ -62,7 +62,7 @@ export default function ResumePreview({ data, masterData }: ResumePreviewProps) 
                     <h2 className={styles.sectionTitle}>Skills</h2>
                     <ul className={styles.skillList}>
                         {(() => {
-                            const skills = data.skills_ranked || [];
+                            const skills = data.selected_skills || [];
                             if (skills.length === 0) return null;
                             const chunkSize = Math.ceil(skills.length / 3) || 1;
                             const chunks = [];
@@ -79,21 +79,21 @@ export default function ResumePreview({ data, masterData }: ResumePreviewProps) 
                 {/* Professional Experience */}
                 <section className={styles.section}>
                     <h2 className={styles.sectionTitle}>Experience</h2>
-                    {data.experience_selected?.map((job: any, idx: number) => (
+                    {data.selected_experiences?.map((job: any, idx: number) => (
                         <div key={idx} className={styles.job}>
                             <div className={styles.jobHeader}>
-                                <div className={styles.jobTitle}>{job.title}</div>
+                                <div className={styles.jobTitle}>{job.role || job.title}</div>
                                 <div className={styles.jobCompany}>
                                     {job.company && <a href="#">{job.company}</a>}
                                 </div>
                                 <div className={styles.jobRight}>
                                     <span className={styles.jobLocation}>{job.location}</span>
                                     {job.location && <span style={{ margin: "0 0.5rem" }} />}
-                                    <span className={styles.jobPeriod}>{job.period}</span>
+                                    <span className={styles.jobPeriod}>{job.start_date} {job.end_date ? `- ${job.end_date}` : job.period}</span>
                                 </div>
                             </div>
                             <ul className={styles.bulletList}>
-                                {job.bullets.map((bullet: string, bIdx: number) => (
+                                {(job.achievements || job.bullets || []).map((bullet: string, bIdx: number) => (
                                     <li key={bIdx}>{bullet}</li>
                                 ))}
                             </ul>
@@ -137,7 +137,7 @@ export default function ResumePreview({ data, masterData }: ResumePreviewProps) 
 
                                 return (
                                     <li key={idx}>
-                                        <strong>{formattedName}</strong>: {proj.relevance_reason}
+                                        <strong>{formattedName}</strong>: {(proj.tags || []).join(", ") || proj.relevance_reason}
                                     </li>
                                 );
                             })}

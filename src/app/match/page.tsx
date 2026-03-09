@@ -55,6 +55,9 @@ export default function MatchPage() {
                     }
                 }
             });
+
+            // Trigger background ML model preload immediately on mount!
+            worker.current.postMessage({ action: 'load' });
         }
 
         return () => {
@@ -130,6 +133,9 @@ export default function MatchPage() {
             keywords_detected: finalSkills,
             selected_skills: finalSkills,
             selected_experiences: topExperiences,
+            education: profile.education,
+            projects_selected: profile.project_bank,
+            certifications: profile.certifications,
             optimization_notes: [
                 `Scan: Matched ${finalSkills.length} total keywords from JD avoiding acronym mismatch.`,
                 `Selected top ${topExperiences.length} experiences using Hybrid ML Scoring (TF-IDF + Cosine Similarity).`
@@ -202,7 +208,29 @@ export default function MatchPage() {
 
                 <div className={styles.rightPane}>
                     <div className={styles.formGroup} style={{ height: "100%" }}>
-                        <label>Generated ATS Optimization JSON</label>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                            <label style={{ margin: 0 }}>Generated ATS Optimization JSON</label>
+                            {generatedJson && (
+                                <button
+                                    className={styles.btnSm}
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(generatedJson);
+                                        const originalText = document.getElementById("copyBtn")?.innerText;
+                                        if (document.getElementById("copyBtn")) {
+                                            document.getElementById("copyBtn")!.innerText = "Copied!";
+                                            setTimeout(() => {
+                                                if (document.getElementById("copyBtn") && originalText) {
+                                                    document.getElementById("copyBtn")!.innerText = "Copy JSON";
+                                                }
+                                            }, 2000);
+                                        }
+                                    }}
+                                    id="copyBtn"
+                                >
+                                    Copy JSON
+                                </button>
+                            )}
+                        </div>
                         <div className={styles.previewContainer} style={{ height: "100%", margin: 0 }}>
                             {generatedJson ? (
                                 <pre className={styles.pre} style={{ whiteSpace: 'pre-wrap' }}>

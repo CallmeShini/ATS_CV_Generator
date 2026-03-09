@@ -21,7 +21,13 @@ class PipelineSingleton {
 // Add event listener to process incoming messages from the main thread
 self.addEventListener('message', async (event) => {
     // We expect the payload to be: { action: 'extract', uid: number, text: string }
-    if (event.data.action === 'extract') {
+    if (event.data.action === 'load') {
+        // Pre-load the model sequentially when the UI mounts
+        await PipelineSingleton.getInstance((x: any) => {
+            self.postMessage({ status: 'progress', progress: x });
+        });
+        self.postMessage({ status: 'progress', progress: { status: 'ready' } });
+    } else if (event.data.action === 'extract') {
         const textToEmbed = event.data.text;
 
         let extractor = await PipelineSingleton.getInstance((x: any) => {
