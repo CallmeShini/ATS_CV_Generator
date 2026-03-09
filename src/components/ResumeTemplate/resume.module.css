@@ -268,17 +268,11 @@
         /* This removes the browser headers and footers (URL, date, page number) */
     }
 
-    body {
-        margin: 0;
-        padding: 0;
-        background: transparent;
-    }
-
-    body * {
-        visibility: hidden;
-    }
-
     .resumeWrapper,
+    .resumeWrapper * {
+        visibility: visible;
+    }
+
     .resumeWrapper * {
         visibility: visible;
     }

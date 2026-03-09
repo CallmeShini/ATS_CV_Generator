@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useMasterProfile } from "../../store/useMasterProfile";
 import { PRELOADED_SKILLS } from "../../constants/skills";
-import { advancedMatch, MatchScore } from "../../utils/matcherAlgorithm";
+import { advancedMatch, cosineSimilarity, MatchScore } from "../../utils/matcherAlgorithm";
 import styles from "../generate/page.module.css";
 import profileStyles from "../profile/page.module.css";
 
@@ -14,42 +14,131 @@ export default function MatchPage() {
     const [generatedJson, setGeneratedJson] = useState("");
     const [isGenerating, setIsGenerating] = useState(false);
 
+    // ML Worker State
+    const [workerStatus, setWorkerStatus] = useState<string>("Initializing Engine...");
+    const [isWorkerReady, setIsWorkerReady] = useState(false);
+    const worker = useRef<Worker | null>(null);
+    const pendingTasks = useRef<Map<number, Function>>(new Map());
+    const uidRef = useRef(1);
+
     // Flatten preloaded skills into a single array for keyword extraction
     const allPreloadedSkills = Object.values(PRELOADED_SKILLS).flat();
 
-    const generateMatch = () => {
+    useEffect(() => {
+        if (!worker.current) {
+            // Initialize Worker
+            worker.current = new Worker(new URL('../../utils/mlWorker.ts', import.meta.url), {
+                type: 'module'
+            });
+
+            worker.current.addEventListener('message', (event) => {
+                const { status, progress, uid, embedding } = event.data;
+
+                if (status === 'progress') {
+                    if (progress && progress.status === 'init') {
+                        setWorkerStatus(`Loading Neural Engine: ${progress.file} ...`);
+                    } else if (progress && progress.status === 'downloading') {
+                        setWorkerStatus(`Downloading ${progress.file}: ${Math.round(progress.progress)}%`);
+                    } else if (progress && progress.status === 'done') {
+                        setWorkerStatus(`Engine Synced.`);
+                        setIsWorkerReady(true);
+                        setTimeout(() => setWorkerStatus("Ready"), 500);
+                    } else if (progress && progress.status === 'ready') {
+                        setIsWorkerReady(true);
+                        setWorkerStatus("Ready");
+                    }
+                } else if (status === 'complete') {
+                    const resolve = pendingTasks.current.get(uid);
+                    if (resolve) {
+                        resolve(embedding);
+                        pendingTasks.current.delete(uid);
+                    }
+                }
+            });
+        }
+
+        return () => {
+            if (worker.current) {
+                worker.current.terminate();
+                worker.current = null;
+            }
+        };
+    }, []);
+
+    const extractEmbedding = async (text: string): Promise<number[]> => {
+        return new Promise((resolve) => {
+            const uid = uidRef.current++;
+            pendingTasks.current.set(uid, resolve);
+            worker.current?.postMessage({ action: 'extract', uid, text });
+        });
+    };
+
+    const generateMatch = async () => {
         setIsGenerating(true);
-        setTimeout(() => {
-            const { finalSkills, scoredExperiences } = advancedMatch(
-                jobDescription,
-                profile.technologies_possible,
-                allPreloadedSkills,
-                profile.experience_master
-            );
+        setWorkerStatus("Parsing text heuristics...");
 
-            // Sort by score and take the top ones (or all if they have some relevance, let's say max 4 for a 1-pager)
-            const topExperiences = scoredExperiences
-                .sort((a: MatchScore, b: MatchScore) => b.score - a.score)
-                .slice(0, 4)
-                .map((item: MatchScore) => ({
-                    ...item.experience,
-                    _matchAnalysis: `Score: ${item.score} pts. Hits: [${item.matchedKeywords.join(", ")}]`
-                }));
+        // 1. Run literal TF-IDF matching first
+        const { finalSkills, scoredExperiences } = advancedMatch(
+            jobDescription,
+            profile.technologies_possible,
+            allPreloadedSkills,
+            profile.experience_master
+        );
 
-            const resultPayload = {
-                target_role: profile.target_positioning,
-                keywords_detected: finalSkills,
-                selected_skills: finalSkills,
-                selected_experiences: topExperiences,
-                optimization_notes: [
-                    `Advanced Scan: Matched ${finalSkills.length} total keywords from JD avoiding acronym mismatch.`,
-                    `Selected top ${topExperiences.length} experiences based on Term Frequency (TF) density weights.`
-                ]
+        setWorkerStatus("Generating JD Embeddings...");
+
+        // 2. Machine Learning: Embedding JD
+        const jdEmbedding = await extractEmbedding(jobDescription);
+
+        setWorkerStatus("Scoring Experiences Semantically...");
+
+        // 3. Create Embeddings for Experiences and Merge Scores
+        const semanticallyScored = await Promise.all(scoredExperiences.map(async (item: MatchScore) => {
+            const expText = [
+                item.experience.role,
+                item.experience.description,
+                ...item.experience.technologies,
+                ...item.experience.achievements
+            ].join(" ");
+
+            const expEmbedding = await extractEmbedding(expText);
+            const semanticScore = cosineSimilarity(jdEmbedding, expEmbedding);
+
+            // Our similarity generally hovers around 0.10 to 1.0. 
+            // We multiply by a massive constant to put semantic parity on the same level as TF hits
+            // Example: 0.82 semantic * 50 = 41 bonus points for meaning exactly the same thing.
+            const semanticBonus = semanticScore * 50;
+
+            return {
+                ...item,
+                semanticSimilarity: semanticScore.toFixed(3),
+                finalHybridScore: Math.round(item.score + semanticBonus)
             };
+        }));
 
-            setGeneratedJson(JSON.stringify(resultPayload, null, 2));
-            setIsGenerating(false);
-        }, 600); // Fake delay for UX feeling
+        // Sort by final Hybrid Score
+        const topExperiences = semanticallyScored
+            .sort((a, b) => b.finalHybridScore - a.finalHybridScore)
+            .slice(0, 4)
+            .map(item => ({
+                ...item.experience,
+                _matchAnalysis: `Hybrid Score: ${item.finalHybridScore} pts | TF: ${item.score} | Semantic: ${item.semanticSimilarity}. Hits: [${item.matchedKeywords.join(", ")}]`
+            }));
+
+        const resultPayload = {
+            target_role: profile.target_positioning,
+            keywords_detected: finalSkills,
+            selected_skills: finalSkills,
+            selected_experiences: topExperiences,
+            optimization_notes: [
+                `Scan: Matched ${finalSkills.length} total keywords from JD avoiding acronym mismatch.`,
+                `Selected top ${topExperiences.length} experiences using Hybrid ML Scoring (TF-IDF + Cosine Similarity).`
+            ]
+        };
+
+        setGeneratedJson(JSON.stringify(resultPayload, null, 2));
+        setWorkerStatus("Ready");
+        setIsGenerating(false);
     };
 
     return (
@@ -73,15 +162,41 @@ export default function MatchPage() {
                             onChange={(e) => setJobDescription(e.target.value)}
                         />
                     </div>
-                    <button
-                        className={styles.btnPrimary}
-                        onClick={generateMatch}
-                        disabled={!jobDescription || isGenerating}
-                    >
-                        {isGenerating ? "Analyzing..." : "Analyze & Match"}
-                    </button>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: "1rem", marginBottom: "1rem" }}>
+                        <button
+                            className={styles.btnPrimary}
+                            onClick={generateMatch}
+                            disabled={!jobDescription || isGenerating || !isWorkerReady}
+                        >
+                            {isGenerating ? "Analyzing..." : "Analyze & Match"}
+                        </button>
+
+                        <div style={{
+                            padding: '0.4rem 0.8rem',
+                            background: isWorkerReady ? 'var(--muted-paper)' : 'var(--accent-red)',
+                            color: isWorkerReady ? 'var(--fg-pencil)' : '#fff',
+                            border: '1px solid var(--border-pencil)',
+                            borderRadius: 'var(--radius-wobbly)',
+                            fontFamily: 'var(--font-patrick)',
+                            fontSize: '0.9rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px'
+                        }}>
+                            <span style={{
+                                width: '8px',
+                                height: '8px',
+                                borderRadius: '50%',
+                                background: isWorkerReady ? '#4ade80' : '#ffd700',
+                                display: 'inline-block'
+                            }}></span>
+                            {workerStatus}
+                        </div>
+                    </div>
+
                     <p style={{ color: "var(--fg-pencil)", opacity: 0.8, fontSize: "0.9rem" }}>
-                        The local engine will cross-reference the JD with your Master Profile experiences and skills to form the ultimate ATS payload.
+                        The local engine will cross-reference the JD with your Master Profile experiences and skills using a mix of Term Frequency logic and Sentence-BERT Machine Learning semantic embeddings.
                     </p>
                 </div>
 

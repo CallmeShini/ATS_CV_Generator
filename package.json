@@ -4,12 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "next lint"
   },
   "dependencies": {
     "@google/genai": "^1.44.0",
+    "@xenova/transformers": "^2.17.2",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",

@@ -43,6 +43,24 @@ function normalizeSkill(skill: string): string {
 }
 
 /**
+ * Calculates the cosine similarity between two vectors.
+ * Ranges from -1 to 1 (1 being exactly the same direction/meaning).
+ */
+export function cosineSimilarity(vecA: number[], vecB: number[]): number {
+    if (vecA.length !== vecB.length) return 0;
+    let dotProduct = 0;
+    let normA = 0;
+    let normB = 0;
+    for (let i = 0; i < vecA.length; i++) {
+        dotProduct += vecA[i] * vecB[i];
+        normA += vecA[i] * vecA[i];
+        normB += vecB[i] * vecB[i];
+    }
+    if (normA === 0 || normB === 0) return 0;
+    return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+}
+
+/**
  * Advanced Matching Algorithm.
  * 1. Counts how many times a skill appears in the Job Description (Term Frequency).
  * 2. Checks synonyms for those skills to guarantee a hit.
