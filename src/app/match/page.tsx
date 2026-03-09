@@ -1,10 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useMasterProfile } from "../../store/useMasterProfile";
-import { PRELOADED_SKILLS } from "../../constants/skills";
-import { advancedMatch, cosineSimilarity, MatchScore } from "../../utils/matcherAlgorithm";
 import styles from "../generate/page.module.css";
 import profileStyles from "../profile/page.module.css";
 
@@ -13,145 +11,50 @@ export default function MatchPage() {
     const [jobDescription, setJobDescription] = useState("");
     const [generatedJson, setGeneratedJson] = useState("");
     const [isGenerating, setIsGenerating] = useState(false);
-
-    // ML Worker State
-    const [workerStatus, setWorkerStatus] = useState<string>("Initializing Engine...");
-    const [isWorkerReady, setIsWorkerReady] = useState(false);
-    const worker = useRef<Worker | null>(null);
-    const pendingTasks = useRef<Map<number, Function>>(new Map());
-    const uidRef = useRef(1);
-
-    // Flatten preloaded skills into a single array for keyword extraction
-    const allPreloadedSkills = Object.values(PRELOADED_SKILLS).flat();
-
-    useEffect(() => {
-        if (!worker.current) {
-            // Initialize Worker
-            worker.current = new Worker(new URL('../../utils/mlWorker.ts', import.meta.url), {
-                type: 'module'
-            });
-
-            worker.current.addEventListener('message', (event) => {
-                const { status, progress, uid, embedding } = event.data;
-
-                if (status === 'progress') {
-                    if (progress && progress.status === 'init') {
-                        setWorkerStatus(`Loading Neural Engine: ${progress.file} ...`);
-                    } else if (progress && progress.status === 'downloading') {
-                        setWorkerStatus(`Downloading ${progress.file}: ${Math.round(progress.progress)}%`);
-                    } else if (progress && progress.status === 'done') {
-                        setWorkerStatus(`Engine Synced.`);
-                        setIsWorkerReady(true);
-                        setTimeout(() => setWorkerStatus("Ready"), 500);
-                    } else if (progress && progress.status === 'ready') {
-                        setIsWorkerReady(true);
-                        setWorkerStatus("Ready");
-                    }
-                } else if (status === 'complete') {
-                    const resolve = pendingTasks.current.get(uid);
-                    if (resolve) {
-                        resolve(embedding);
-                        pendingTasks.current.delete(uid);
-                    }
-                }
-            });
-
-            // Trigger background ML model preload immediately on mount!
-            worker.current.postMessage({ action: 'load' });
-        }
-
-        return () => {
-            if (worker.current) {
-                worker.current.terminate();
-                worker.current = null;
-            }
-        };
-    }, []);
-
-    const extractEmbedding = async (text: string): Promise<number[]> => {
-        return new Promise((resolve) => {
-            const uid = uidRef.current++;
-            pendingTasks.current.set(uid, resolve);
-            worker.current?.postMessage({ action: 'extract', uid, text });
-        });
-    };
+    const [workerStatus, setWorkerStatus] = useState<string>("Ready");
 
     const generateMatch = async () => {
         setIsGenerating(true);
-        setWorkerStatus("Parsing text heuristics...");
+        setWorkerStatus("Connecting to Cloud Engine...");
 
-        // 1. Run literal TF-IDF matching first
-        const { finalSkills, scoredExperiences } = advancedMatch(
-            jobDescription,
-            profile.technologies_possible,
-            allPreloadedSkills,
-            profile.experience_master
-        );
+        try {
+            const response = await fetch('/api/match', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    jobDescription,
+                    userProfile: profile
+                })
+            });
 
-        setWorkerStatus("Generating JD Embeddings...");
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `HTTP ${response.status}`);
+            }
 
-        // 2. Machine Learning: Embedding JD
-        const jdEmbedding = await extractEmbedding(jobDescription);
+            setWorkerStatus("Constructing JSON Payload...");
+            const data = await response.json();
 
-        setWorkerStatus("Scoring Experiences Semantically...");
+            // The API returns the strictly typed Zod object as 'payload'
+            setGeneratedJson(JSON.stringify(data.payload, null, 2));
+            setWorkerStatus("Sync Complete.");
 
-        // 3. Create Embeddings for Experiences and Merge Scores
-        const semanticallyScored = await Promise.all(scoredExperiences.map(async (item: MatchScore) => {
-            const expText = [
-                item.experience.role,
-                item.experience.description,
-                ...item.experience.technologies,
-                ...item.experience.achievements
-            ].join(" ");
-
-            const expEmbedding = await extractEmbedding(expText);
-            const semanticScore = cosineSimilarity(jdEmbedding, expEmbedding);
-
-            // Our similarity generally hovers around 0.10 to 1.0. 
-            // We multiply by a massive constant to put semantic parity on the same level as TF hits
-            // Example: 0.82 semantic * 50 = 41 bonus points for meaning exactly the same thing.
-            const semanticBonus = semanticScore * 50;
-
-            return {
-                ...item,
-                semanticSimilarity: semanticScore.toFixed(3),
-                finalHybridScore: Math.round(item.score + semanticBonus)
-            };
-        }));
-
-        // Sort by final Hybrid Score, but DO NOT slice (Additive Matcher principle: we keep the user's whole life path, just sort it to highlight relevance)
-        const topExperiences = semanticallyScored
-            .sort((a, b) => b.finalHybridScore - a.finalHybridScore)
-            .map(item => ({
-                ...item.experience,
-                _matchAnalysis: `Hybrid Score: ${item.finalHybridScore} pts | TF: ${item.score} | Semantic: ${item.semanticSimilarity}. Hits: [${item.matchedKeywords.join(", ")}]`
-            }));
-
-        const resultPayload = {
-            target_role: profile.target_positioning,
-            professional_summary: profile.professional_summary_base, // Inject Additive Summary
-            keywords_detected: finalSkills,
-            // Additive Skills Principle: Keep user's default stack, but prepend the explicitly matched JD keywords
-            selected_skills: Array.from(new Set([...finalSkills, ...profile.technologies_possible])),
-            selected_experiences: topExperiences,
-            education: profile.education,
-            projects_selected: profile.project_bank,
-            certifications: profile.certifications,
-            optimization_notes: [
-                `Scan: Matched ${finalSkills.length} total keywords from JD avoiding acronym mismatch.`,
-                `Selected top ${topExperiences.length} experiences using Hybrid ML Scoring (TF-IDF + Cosine Similarity).`
-            ]
-        };
-
-        setGeneratedJson(JSON.stringify(resultPayload, null, 2));
-        setWorkerStatus("Ready");
-        setIsGenerating(false);
+        } catch (err: any) {
+            console.error("Match error:", err);
+            setWorkerStatus(`Engine Error: ${err.message}`);
+            setGeneratedJson(JSON.stringify({ error: err.message }, null, 2));
+        } finally {
+            setIsGenerating(false);
+            setTimeout(() => setWorkerStatus("Ready"), 3000);
+        }
     };
 
     return (
         <div className={styles.container}>
             <header className={styles.header}>
-                <h1 className={styles.title}>Job Matcher Algorithm</h1>
+                <h1 className={styles.title}>Cloud Matcher Engine</h1>
                 <div style={{ display: 'flex', gap: '1rem' }}>
                     <Link href="/" className={profileStyles.navBtn}>← Dashboard</Link>
                     <Link href="/generate" className={profileStyles.navBtn}>Go to Generator →</Link>
@@ -174,36 +77,35 @@ export default function MatchPage() {
                         <button
                             className={styles.btnPrimary}
                             onClick={generateMatch}
-                            disabled={!jobDescription || isGenerating || !isWorkerReady}
+                            disabled={!jobDescription || isGenerating}
                         >
                             {isGenerating ? "Analyzing..." : "Analyze & Match"}
                         </button>
 
                         <div style={{
                             padding: '0.4rem 0.8rem',
-                            background: isWorkerReady ? 'var(--muted-paper)' : 'var(--accent-red)',
-                            color: isWorkerReady ? 'var(--fg-pencil)' : '#fff',
-                            border: '1px solid var(--border-pencil)',
-                            borderRadius: 'var(--radius-wobbly)',
-                            fontFamily: 'var(--font-patrick)',
-                            fontSize: '0.9rem',
+                            background: 'transparent',
+                            color: 'var(--foreground)',
+                            border: '1px solid var(--border)',
+                            fontFamily: 'var(--font-mono)',
+                            fontSize: '0.75rem',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '6px'
+                            gap: '6px',
+                            textTransform: 'uppercase'
                         }}>
                             <span style={{
                                 width: '8px',
                                 height: '8px',
-                                borderRadius: '50%',
-                                background: isWorkerReady ? '#4ade80' : '#ffd700',
+                                background: isGenerating ? 'var(--foreground)' : 'var(--muted-foreground)',
                                 display: 'inline-block'
                             }}></span>
                             {workerStatus}
                         </div>
                     </div>
 
-                    <p style={{ color: "var(--fg-pencil)", opacity: 0.8, fontSize: "0.9rem" }}>
-                        The local engine will cross-reference the JD with your Master Profile experiences and skills using a mix of Term Frequency logic and Sentence-BERT Machine Learning semantic embeddings.
+                    <p style={{ color: "var(--muted-foreground)", fontSize: "0.875rem", fontFamily: "var(--font-body)", lineHeight: 1.5 }}>
+                        The Serverless engine will securely analyze the JD, cross-reference it statelessly with your localStorage profile, and map the outputs into our strict V1 ATS schema format.
                     </p>
                 </div>
 
@@ -238,7 +140,7 @@ export default function MatchPage() {
                                     {generatedJson}
                                 </pre>
                             ) : (
-                                <p style={{ color: "#aaa", textAlign: "center", marginTop: "40%" }}>
+                                <p style={{ color: "var(--muted-foreground)", textAlign: "center", marginTop: "40%", fontFamily: 'var(--font-body)' }}>
                                     Your tailored JSON structure will appear here. Paste it onto the Generator later.
                                 </p>
                             )}

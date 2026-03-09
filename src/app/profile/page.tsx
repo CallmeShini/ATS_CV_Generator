@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useMasterProfile } from "../../store/useMasterProfile";
-import { PRELOADED_SKILLS } from "../../constants/skills";
 import styles from "./page.module.css";
 
 export default function ProfilePage() {
@@ -14,20 +13,7 @@ export default function ProfilePage() {
         setIsClient(true);
     }, []);
 
-    const allSkillsBank = useMemo(() => {
-        return profile.technologies_possible;
-    }, [profile.technologies_possible]);
-
     if (!isClient) return null;
-
-    const toggleSkill = (skill: string) => {
-        const currentSkills = [...profile.technologies_possible];
-        if (currentSkills.includes(skill)) {
-            setProfile({ technologies_possible: currentSkills.filter(s => s !== skill) });
-        } else {
-            setProfile({ technologies_possible: [...currentSkills, skill] });
-        }
-    };
 
     return (
         <div className={styles.container}>
@@ -113,31 +99,6 @@ export default function ProfilePage() {
                         value={profile.core_domains.join(", ")}
                         onChange={(e) => setProfile({ core_domains: e.target.value.split(",").map(s => s.trim()) })}
                     />
-                </div>
-
-                <div className={styles.formGroup}>
-                    <label>Tech Skills Library (Click to toggle)</label>
-                    <div className={styles.skillsContainer}>
-                        {Object.entries(PRELOADED_SKILLS).map(([category, skills]) => (
-                            <div key={category} className={styles.skillCategory}>
-                                <h4 className={styles.skillCategoryTitle}>{category}</h4>
-                                <div className={styles.skillChips}>
-                                    {skills.map(skill => {
-                                        const isSelected = allSkillsBank.includes(skill);
-                                        return (
-                                            <button
-                                                key={skill}
-                                                onClick={() => toggleSkill(skill)}
-                                                className={`${styles.skillChip} ${isSelected ? styles.skillChipActive : ''}`}
-                                            >
-                                                {skill}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
                 </div>
 
                 <div className={styles.formGroup}>
