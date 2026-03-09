@@ -7,12 +7,13 @@ export const EducationSchema = z.object({
 });
 
 export const ExperienceSchema = z.object({
-    title: z.string(),
     company: z.string(),
-    period: z.string(),
-    location: z.string(),
-    base_description: z.string(),
-    bullet_bank: z.array(z.string()),
+    role: z.string(),
+    start_date: z.string(),
+    end_date: z.string(),
+    description: z.string(),
+    technologies: z.array(z.string()),
+    achievements: z.array(z.string()),
 });
 
 export const ProjectSchema = z.object({

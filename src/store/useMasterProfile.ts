@@ -58,81 +58,42 @@ const initialProfile: MasterProfile = {
     ],
     experience_master: [
         {
-            title: "Technical Systems Engineer",
             company: "Flama Studio",
-            period: "2025",
-            location: "Brazil",
-            base_description: "Worked on technical infrastructures for immersive environments, interactive systems and real-time media workflows.",
-            bullet_bank: [
+            role: "Technical Systems Engineer",
+            start_date: "Jan 2025",
+            end_date: "Present",
+            description: "Worked on technical infrastructures for immersive environments, interactive systems and real-time media workflows.",
+            technologies: ["Hardware Integration", "Media Pipelines", "Automation"],
+            achievements: [
                 "Designed and implemented real-time visual and media pipelines used in immersive environments.",
                 "Integrated hardware systems including cameras, lighting and media infrastructure with software-driven workflows.",
-                "Developed automation processes to improve operational efficiency and system reliability.",
-                "Supported system-level integration across software, visual systems and interactive technologies."
+                "Developed automation processes to improve operational efficiency and system reliability."
             ]
         },
         {
-            title: "Senior Technical Director - Interactive Systems",
             company: "Metaversoexp / Grupo Flama",
-            period: "2024 - 2025",
-            location: "Brazil",
-            base_description: "Led technical systems development for esports productions and immersive interactive environments.",
-            bullet_bank: [
+            role: "Senior Technical Director",
+            start_date: "Jan 2024",
+            end_date: "Dec 2024",
+            description: "Led technical systems development for esports productions and immersive interactive environments.",
+            technologies: ["Real-time Systems", "Esports Logistics", "Live Media Processing"],
+            achievements: [
                 "Architected real-time visual and media systems for large-scale productions.",
                 "Designed workflows for capture, synchronization and real-time media processing.",
-                "Integrated software systems with audiovisual hardware and stage infrastructure.",
                 "Coordinated multidisciplinary technical teams across software, media engineering and production systems."
             ]
         },
         {
-            title: "Software Engineer - Automation & Digital Systems",
             company: "CredutPay",
-            period: "2025",
-            location: "Brazil",
-            base_description: "Worked on internal tools and workflow automation supporting digital operations and system integration.",
-            bullet_bank: [
+            role: "Software Engineer",
+            start_date: "2024",
+            end_date: "2024",
+            description: "Worked on internal tools and workflow automation supporting digital operations and system integration.",
+            technologies: ["Node.js", "Python", "Process Automation"],
+            achievements: [
                 "Developed internal automation tools to streamline content and operational workflows.",
                 "Implemented software-driven pipelines for digital processing and publishing tasks.",
-                "Built integrations between internal systems, analytics tools and digital platforms.",
                 "Improved scalability and repeatability through process standardization and automation."
-            ]
-        },
-        {
-            title: "Researcher - Computer Vision & Autonomous Cinematography",
-            company: "UNIPÊ",
-            period: "2024 - 2025",
-            location: "Brazil",
-            base_description: "Research project exploring autonomous cinematography with robotic arms and RGB-D cameras.",
-            bullet_bank: [
-                "Prototyped autonomous camera systems using robotic manipulators and RGB-D sensors.",
-                "Explored computer vision approaches for tracking, framing and automated capture.",
-                "Studied real-time perception pipelines applied to robotic camera motion.",
-                "Contributed technical insights to experimental research on automated cinematographic systems."
-            ]
-        },
-        {
-            title: "Game Developer - FiveM (Maps, Assets & Scripting)",
-            company: "CFX.re",
-            period: "2022 - 2023",
-            location: "Brazil",
-            base_description: "Developed gameplay systems, environments and technical content for custom GTA V servers.",
-            bullet_bank: [
-                "Built custom maps, environments and technical assets for multiplayer gameplay.",
-                "Implemented gameplay mechanics and interactions using Lua scripting.",
-                "Optimized systems and assets for performance, stability and player experience.",
-                "Supported custom server identities through technical and gameplay-focused development."
-            ]
-        },
-        {
-            title: "Information Security Consultant - Red Team",
-            company: "PBSoft",
-            period: "2021 - 2022",
-            location: "Brazil",
-            base_description: "Performed security testing and vulnerability assessment for enterprise systems.",
-            bullet_bank: [
-                "Conducted vulnerability assessments using OWASP-aligned methodologies.",
-                "Executed simulated attack scenarios and penetration testing activities.",
-                "Worked with tools such as Burp Suite, Metasploit and OWASP ZAP.",
-                "Produced technical findings to support remediation and security hardening."
             ]
         }
     ],

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { useMasterProfile } from "../../store/useMasterProfile";
+import { PRELOADED_SKILLS } from "../../constants/skills";
 import styles from "./page.module.css";
 
 export default function ProfilePage() {
@@ -13,7 +14,20 @@ export default function ProfilePage() {
         setIsClient(true);
     }, []);
 
-    if (!isClient) return null; // Avoid hydration mismatch
+    const allSkillsBank = useMemo(() => {
+        return profile.technologies_possible;
+    }, [profile.technologies_possible]);
+
+    if (!isClient) return null;
+
+    const toggleSkill = (skill: string) => {
+        const currentSkills = [...profile.technologies_possible];
+        if (currentSkills.includes(skill)) {
+            setProfile({ technologies_possible: currentSkills.filter(s => s !== skill) });
+        } else {
+            setProfile({ technologies_possible: [...currentSkills, skill] });
+        }
+    };
 
     return (
         <div className={styles.container}>
@@ -102,47 +116,69 @@ export default function ProfilePage() {
                 </div>
 
                 <div className={styles.formGroup}>
-                    <label>Programming Languages (comma separated)</label>
-                    <input
-                        className={styles.input}
-                        value={profile.languages_programming.join(", ")}
-                        onChange={(e) => setProfile({ languages_programming: e.target.value.split(",").map(s => s.trim()) })}
-                    />
+                    <label>Tech Skills Library (Click to toggle)</label>
+                    <div className={styles.skillsContainer}>
+                        {Object.entries(PRELOADED_SKILLS).map(([category, skills]) => (
+                            <div key={category} className={styles.skillCategory}>
+                                <h4 className={styles.skillCategoryTitle}>{category}</h4>
+                                <div className={styles.skillChips}>
+                                    {skills.map(skill => {
+                                        const isSelected = allSkillsBank.includes(skill);
+                                        return (
+                                            <button
+                                                key={skill}
+                                                onClick={() => toggleSkill(skill)}
+                                                className={`${styles.skillChip} ${isSelected ? styles.skillChipActive : ''}`}
+                                            >
+                                                {skill}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
                 <div className={styles.formGroup}>
-                    <label>Technologies / Tools (comma separated)</label>
+                    <label>Custom Tech Skills (comma separated overrides)</label>
                     <input
                         className={styles.input}
                         value={profile.technologies_possible.join(", ")}
-                        onChange={(e) => setProfile({ technologies_possible: e.target.value.split(",").map(s => s.trim()) })}
+                        onChange={(e) => setProfile({ technologies_possible: e.target.value.split(",").map(s => s.trim()).filter(Boolean) })}
                     />
                 </div>
             </div>
 
             <div className={styles.section}>
-                <h2 className={styles.sectionTitle}>Experience Bullet Bank</h2>
-                <p style={{ color: "var(--text-muted)", marginBottom: "1rem" }}>
-                    This is the core collection of all things you've done. AI will pick and rewrite from here based on the target job.
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                    <h2 className={styles.sectionTitle} style={{ margin: 0 }}>Experience Log</h2>
+                    <button
+                        className={styles.btnSm}
+                        onClick={() => {
+                            const newExps = [...profile.experience_master];
+                            newExps.unshift({
+                                company: "New Company",
+                                role: "Job Title",
+                                start_date: "Month YYYY",
+                                end_date: "Present",
+                                description: "Brief role description.",
+                                technologies: [],
+                                achievements: ["New achievement..."]
+                            });
+                            setProfile({ experience_master: newExps });
+                        }}
+                    >
+                        + Add Experience
+                    </button>
+                </div>
+                <p style={{ color: "var(--fg-pencil)", opacity: 0.8, marginBottom: "1.5rem" }}>
+                    Track all career roles here. AI will extract and tailor the best matches for your resume.
                 </p>
 
                 {profile.experience_master.map((exp, idx) => (
-                    <div key={idx} style={{ marginBottom: "2rem", paddingBottom: "1rem", borderBottom: "1px dashed var(--border)" }}>
+                    <div key={idx} style={{ marginBottom: "2.5rem", paddingBottom: "1.5rem", borderBottom: "3px dashed var(--muted-paper)" }}>
                         <div className={styles.row}>
-                            <div className={styles.col}>
-                                <div className={styles.formGroup}>
-                                    <label>Title</label>
-                                    <input
-                                        className={styles.input}
-                                        value={exp.title}
-                                        onChange={(e) => {
-                                            const newExps = [...profile.experience_master];
-                                            newExps[idx].title = e.target.value;
-                                            setProfile({ experience_master: newExps });
-                                        }}
-                                    />
-                                </div>
-                            </div>
                             <div className={styles.col}>
                                 <div className={styles.formGroup}>
                                     <label>Company</label>
@@ -159,13 +195,43 @@ export default function ProfilePage() {
                             </div>
                             <div className={styles.col}>
                                 <div className={styles.formGroup}>
-                                    <label>Period</label>
+                                    <label>Role</label>
                                     <input
                                         className={styles.input}
-                                        value={exp.period}
+                                        value={exp.role}
                                         onChange={(e) => {
                                             const newExps = [...profile.experience_master];
-                                            newExps[idx].period = e.target.value;
+                                            newExps[idx].role = e.target.value;
+                                            setProfile({ experience_master: newExps });
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div className={styles.row}>
+                            <div className={styles.col}>
+                                <div className={styles.formGroup}>
+                                    <label>Start Date</label>
+                                    <input
+                                        className={styles.input}
+                                        value={exp.start_date}
+                                        onChange={(e) => {
+                                            const newExps = [...profile.experience_master];
+                                            newExps[idx].start_date = e.target.value;
+                                            setProfile({ experience_master: newExps });
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                            <div className={styles.col}>
+                                <div className={styles.formGroup}>
+                                    <label>End Date</label>
+                                    <input
+                                        className={styles.input}
+                                        value={exp.end_date}
+                                        onChange={(e) => {
+                                            const newExps = [...profile.experience_master];
+                                            newExps[idx].end_date = e.target.value;
                                             setProfile({ experience_master: newExps });
                                         }}
                                     />
@@ -173,28 +239,44 @@ export default function ProfilePage() {
                             </div>
                         </div>
                         <div className={styles.formGroup}>
-                            <label>Base Description</label>
-                            <input
-                                className={styles.input}
-                                value={exp.base_description}
+                            <label>General Description</label>
+                            <textarea
+                                className={styles.textarea}
+                                style={{ minHeight: '80px' }}
+                                value={exp.description}
                                 onChange={(e) => {
                                     const newExps = [...profile.experience_master];
-                                    newExps[idx].base_description = e.target.value;
+                                    newExps[idx].description = e.target.value;
                                     setProfile({ experience_master: newExps });
                                 }}
                             />
                         </div>
+
                         <div className={styles.formGroup}>
-                            <label>Bullets (The Bank)</label>
+                            <label>Technologies Used (comma separated)</label>
+                            <input
+                                className={styles.input}
+                                value={exp.technologies.join(", ")}
+                                onChange={(e) => {
+                                    const newExps = [...profile.experience_master];
+                                    newExps[idx].technologies = e.target.value.split(",").map(t => t.trim()).filter(Boolean);
+                                    setProfile({ experience_master: newExps });
+                                }}
+                            />
+                        </div>
+
+                        <div className={styles.formGroup}>
+                            <label>Achievements (Bullet Points)</label>
                             <div className={styles.arrayInput}>
-                                {exp.bullet_bank.map((bullet, bIdx) => (
-                                    <div key={bIdx} className={styles.arrayItem}>
-                                        <input
-                                            className={styles.input}
-                                            value={bullet}
+                                {exp.achievements.map((achiev, aIdx) => (
+                                    <div key={aIdx} className={styles.arrayItem}>
+                                        <textarea
+                                            className={styles.textarea}
+                                            style={{ minHeight: "60px", flex: 1 }}
+                                            value={achiev}
                                             onChange={(e) => {
                                                 const newExps = [...profile.experience_master];
-                                                newExps[idx].bullet_bank[bIdx] = e.target.value;
+                                                newExps[idx].achievements[aIdx] = e.target.value;
                                                 setProfile({ experience_master: newExps });
                                             }}
                                         />
@@ -202,11 +284,11 @@ export default function ProfilePage() {
                                             className={`${styles.btnSm} ${styles.btnRemove}`}
                                             onClick={() => {
                                                 const newExps = [...profile.experience_master];
-                                                newExps[idx].bullet_bank.splice(bIdx, 1);
+                                                newExps[idx].achievements.splice(aIdx, 1);
                                                 setProfile({ experience_master: newExps });
                                             }}
                                         >
-                                            Delete
+                                            X
                                         </button>
                                     </div>
                                 ))}
@@ -215,13 +297,26 @@ export default function ProfilePage() {
                                     style={{ alignSelf: "flex-start", marginTop: "0.5rem" }}
                                     onClick={() => {
                                         const newExps = [...profile.experience_master];
-                                        newExps[idx].bullet_bank.push("New bullet achievement...");
+                                        newExps[idx].achievements.push("");
                                         setProfile({ experience_master: newExps });
                                     }}
                                 >
-                                    + Add Bullet
+                                    + Add Achievement
                                 </button>
                             </div>
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
+                            <button
+                                className={`${styles.btnSm} ${styles.btnRemove}`}
+                                onClick={() => {
+                                    const newExps = [...profile.experience_master];
+                                    newExps.splice(idx, 1);
+                                    setProfile({ experience_master: newExps });
+                                }}
+                            >
+                                Delete Experience Block
+                            </button>
                         </div>
                     </div>
                 ))}

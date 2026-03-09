@@ -1,3 +1,4 @@
+import Link from "next/link";
 import styles from "./page.module.css";
 
 export default function Home() {
@@ -9,14 +10,19 @@ export default function Home() {
       </header>
       <main className={styles.main}>
         <div className={styles.card}>
-          <h2>Master Profile</h2>
-          <p>Manage your core details, skills, and experience bullet bank.</p>
-          <a href="/profile" className={styles.btn}>Edit Profile</a>
+          <h2>1. Master Profile</h2>
+          <p>Manage your core details, predefined skills, and full experience bullet bank manually.</p>
+          <Link href="/profile" className={styles.btn}>Edit Profile</Link>
         </div>
         <div className={styles.card}>
-          <h2>Generate Resume</h2>
-          <p>Paste a job description and let AI tailor your resume instantly.</p>
-          <a href="/generate" className={styles.btnPrimary}>New Resume</a>
+          <h2>2. Job Matcher</h2>
+          <p>Extract ATS keywords from job descriptions and generate the optimized JSON mapping locally.</p>
+          <Link href="/match" className={styles.btnPrimary}>Analyze Job</Link>
+        </div>
+        <div className={styles.card} style={{ transform: "rotate(1deg)", background: "var(--bg-paper)" }}>
+          <h2>3. Export PDF</h2>
+          <p>Paste the optimized JSON to render and print the pixel-perfect minimalist PDF document.</p>
+          <Link href="/generate" className={styles.btn}>Render Resume</Link>
         </div>
       </main>
     </div>

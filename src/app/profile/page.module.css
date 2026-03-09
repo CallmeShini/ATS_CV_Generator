@@ -174,3 +174,55 @@
     transform: translate(4px, 4px);
     box-shadow: none;
 }
+
+.skillsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 0.5rem;
+    padding: 1rem;
+    border: 3px solid var(--border-pencil);
+    border-radius: var(--radius-wobbly);
+    background: var(--muted-paper);
+}
+
+.skillCategoryTitle {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--fg-pencil);
+    font-family: var(--font-kalam);
+}
+
+.skillChips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.skillChip {
+    padding: 0.3rem 0.8rem;
+    font-family: var(--font-patrick);
+    font-size: 1rem;
+    background: #fff;
+    border: 2px solid var(--border-pencil);
+    border-radius: var(--radius-wobbly-md);
+    cursor: pointer;
+    box-shadow: 2px 2px 0px 0px rgba(45, 45, 45, 0.2);
+    transition: all 0.1s ease;
+}
+
+.skillChip:hover {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0px 0px rgba(45, 45, 45, 0.2);
+    background: var(--accent-blue);
+    color: #fff;
+}
+
+.skillChipActive {
+    background: var(--accent-red);
+    color: #fff;
+    border-color: var(--border-pencil);
+    transform: translate(2px, 2px);
+    box-shadow: none;
+}
