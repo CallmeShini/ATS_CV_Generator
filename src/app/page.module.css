@@ -1,52 +1,70 @@
 .container {
     min-height: 100vh;
     padding: 4rem 2rem;
-    max-width: 1200px;
+    max-width: 1000px;
     margin: 0 auto;
 }
 
 .header {
-    margin-bottom: 3rem;
+    margin-bottom: 4rem;
     text-align: center;
 }
 
 .header h1 {
-    font-size: 2.5rem;
+    font-size: 3.5rem;
     margin-bottom: 0.5rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
+    transform: rotate(-1deg);
 }
 
 .header p {
-    color: var(--text-muted);
-    font-size: 1.1rem;
+    color: var(--fg-pencil);
+    font-size: 1.4rem;
+    opacity: 0.8;
 }
 
 .main {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
+    gap: 3rem;
 }
 
 .card {
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 2rem;
-    background: var(--background);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 3px solid var(--border-pencil);
+    border-radius: var(--radius-wobbly-md);
+    padding: 2.5rem;
+    background: #fff;
+    box-shadow: var(--shadow-hard);
     display: flex;
     flex-direction: column;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    position: relative;
+}
+
+.card:nth-child(1) {
+    transform: rotate(1deg);
+    background: var(--bg-paper);
+}
+
+.card:nth-child(2) {
+    transform: rotate(-1deg);
+    background: #fff9c4;
+    /* post-it yellow */
+}
+
+.card:hover {
+    transform: rotate(0deg) translateY(-2px);
+    box-shadow: var(--shadow-hard-lg);
 }
 
 .card h2 {
-    font-size: 1.5rem;
-    margin-bottom: 0.75rem;
-    font-weight: 500;
+    font-size: 2rem;
+    margin-bottom: 1rem;
 }
 
 .card p {
-    color: var(--text-muted);
-    margin-bottom: 2rem;
+    color: var(--fg-pencil);
+    font-size: 1.2rem;
+    margin-bottom: 2.5rem;
     line-height: 1.5;
     flex: 1;
 }
@@ -54,29 +72,43 @@
 .btn,
 .btnPrimary {
     display: inline-block;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 500;
+    padding: 0.8rem 1.5rem;
+    border-radius: var(--radius-wobbly);
+    font-weight: 700;
+    font-size: 1.2rem;
     text-align: center;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.1s ease;
     width: 100%;
+    border: 3px solid var(--border-pencil);
+    box-shadow: var(--shadow-hard);
+    color: var(--fg-pencil);
 }
 
 .btn {
-    background: var(--secondary);
-    color: var(--foreground);
-    border: 1px solid var(--border);
+    background: var(--muted-paper);
 }
 
 .btnPrimary {
-    background: var(--primary);
-    color: var(--background);
-    border: 1px solid var(--primary);
+    background: #fff;
 }
 
-.btn:hover,
+.btn:hover {
+    background: var(--accent-blue);
+    color: #fff;
+    transform: translate(2px, 2px);
+    box-shadow: var(--shadow-hard-hover);
+}
+
 .btnPrimary:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
+    background: var(--accent-red);
+    color: #fff;
+    transform: translate(2px, 2px);
+    box-shadow: var(--shadow-hard-hover);
+}
+
+.btn:active,
+.btnPrimary:active {
+    transform: translate(4px, 4px);
+    box-shadow: none;
 }

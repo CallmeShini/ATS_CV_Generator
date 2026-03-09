@@ -1,5 +1,5 @@
 .container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 3rem 1.5rem;
     display: flex;
@@ -11,31 +11,47 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 3px dashed var(--border-pencil);
     padding-bottom: 1rem;
 }
 
 .title {
-    font-size: 2rem;
-    font-weight: 600;
+    font-size: 3rem;
+    font-weight: 700;
+    transform: rotate(1deg);
 }
 
 .splitView {
     display: flex;
-    gap: 2rem;
+    gap: 3rem;
     min-height: 70vh;
 }
 
-.leftPane,
-.rightPane {
+.leftPane {
     flex: 1;
-    background: var(--background);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 1.5rem;
+    background: #fff;
+    border: 3px solid var(--border-pencil);
+    border-radius: var(--radius-wobbly-md);
+    padding: 2rem;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.5rem;
+    box-shadow: var(--shadow-hard);
+    transform: rotate(-0.5deg);
+    max-width: 500px;
+}
+
+.rightPane {
+    flex: 2;
+    background: #fff;
+    border: 3px solid var(--border-pencil);
+    border-radius: var(--radius-wobbly-md);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    box-shadow: var(--shadow-hard);
+    transform: rotate(0.5deg);
 }
 
 .formGroup {
@@ -45,19 +61,22 @@
 }
 
 .formGroup label {
-    font-weight: 500;
-    font-size: 0.95rem;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--fg-pencil);
 }
 
 .input,
 .textarea {
     padding: 0.75rem;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background: var(--background);
-    color: var(--foreground);
+    border: 3px solid var(--border-pencil);
+    border-radius: var(--radius-wobbly-md);
+    background: #fff;
+    color: var(--fg-pencil);
     font-family: inherit;
-    font-size: 1rem;
+    font-size: 1.1rem;
+    box-shadow: 2px 2px 0px 0px rgba(45, 45, 45, 0.1);
+    transition: all 0.1s ease;
 }
 
 .textarea {
@@ -68,36 +87,52 @@
 .input:focus,
 .textarea:focus {
     outline: none;
-    border-color: var(--primary);
+    border-color: var(--accent-blue);
+    box-shadow: 4px 4px 0px 0px var(--accent-blue);
 }
 
 .btnPrimary {
-    background: var(--primary);
-    color: var(--background);
-    padding: 0.75rem 1.5rem;
-    border-radius: 6px;
-    font-weight: 500;
-    border: none;
+    background: #fff;
+    color: var(--fg-pencil);
+    padding: 0.8rem 1.5rem;
+    border-radius: var(--radius-wobbly);
+    font-weight: 700;
+    font-size: 1.2rem;
+    border: 3px solid var(--border-pencil);
+    box-shadow: var(--shadow-hard);
     cursor: pointer;
-    transition: opacity 0.2s;
+    transition: all 0.1s ease;
     align-self: flex-start;
 }
 
 .btnPrimary:hover {
-    opacity: 0.9;
+    background: var(--accent-red);
+    color: #fff;
+    transform: translate(2px, 2px);
+    box-shadow: var(--shadow-hard-hover);
+}
+
+.btnPrimary:active {
+    transform: translate(4px, 4px);
+    box-shadow: none;
 }
 
 .btnPrimary:disabled {
-    opacity: 0.5;
+    background: var(--muted-paper);
+    color: #888;
+    transform: none;
+    box-shadow: var(--shadow-hard);
     cursor: not-allowed;
+    border-color: #888;
 }
 
 .previewContainer {
     flex: 1;
-    background: var(--secondary);
-    border-radius: 6px;
+    background: var(--muted-paper);
+    border-radius: 4px;
     padding: 1rem;
     overflow: auto;
+    border: 2px dashed rgba(0, 0, 0, 0.1);
 }
 
 .pre {

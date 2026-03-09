@@ -1,21 +1,20 @@
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --primary: #000000;
-  --secondary: #f4f4f5;
-  --border: #e5e5e5;
-  --text-muted: #737373;
-}
+  /* Hand-Drawn Color Palette */
+  --bg-paper: #fdfbf7;
+  --fg-pencil: #2d2d2d;
+  --muted-paper: #e5e0d8;
+  --accent-red: #ff4d4d;
+  --accent-blue: #2d5da1;
+  --border-pencil: #2d2d2d;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #000000;
-    --foreground: #ededed;
-    --primary: #ffffff;
-    --secondary: #27272a;
-    --border: #333333;
-    --text-muted: #a1a1aa;
-  }
+  /* Custom Wobbly Radii */
+  --radius-wobbly: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  --radius-wobbly-md: 25px 10px 30px 15px / 15px 30px 10px 25px;
+
+  /* Hard Offset Shadows */
+  --shadow-hard: 4px 4px 0px 0px var(--fg-pencil);
+  --shadow-hard-hover: 2px 2px 0px 0px var(--fg-pencil);
+  --shadow-hard-lg: 8px 8px 0px 0px var(--fg-pencil);
 }
 
 * {
@@ -31,11 +30,23 @@ body {
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: var(--font-geist-sans), Helvetica, Arial, sans-serif;
+  color: var(--fg-pencil);
+  background-color: var(--bg-paper);
+  background-image: radial-gradient(var(--muted-paper) 1px, transparent 1px);
+  background-size: 24px 24px;
+  font-family: var(--font-patrick), Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-kalam), Helvetica, Arial, sans-serif;
+  font-weight: 700;
 }
 
 a {
