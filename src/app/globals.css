@@ -28,7 +28,7 @@
 
   /* Links */
   a {
-    color: var(--fg);
+    color: inherit;
     text-decoration: none;
     transition: all 100ms linear;
   }
@@ -138,6 +138,7 @@ select:focus-visible {
 @media print {
   @page {
     margin: 0;
+    size: A4;
   }
 
   body {

@@ -177,7 +177,7 @@ export default function Home() {
             </div>
 
             <div>
-              <h4 className="font-black text-lg uppercase tracking-widest mb-6 border-b-4 border-neo-primary pb-2 inline-block">Módulos</h4>
+              <h4 className="font-black text-lg uppercase tracking-widest mb-6 border-b-4 border-neo-accent pb-2 inline-block">Módulos</h4>
               <nav className="flex flex-col gap-4 font-bold text-lg">
                 <Link href="/profile" className="hover:text-neo-secondary hover:translate-x-2 transition-transform w-fit">Master Profile</Link>
                 <Link href="/match" className="hover:text-neo-accent hover:translate-x-2 transition-transform w-fit">Job Matcher</Link>
@@ -186,7 +186,7 @@ export default function Home() {
             </div>
 
             <div>
-              <h4 className="font-black text-lg uppercase tracking-widest mb-6 border-b-4 border-neo-primary pb-2 inline-block">Tech</h4>
+              <h4 className="font-black text-lg uppercase tracking-widest mb-6 border-b-4 border-neo-accent pb-2 inline-block">Tech</h4>
               <ul className="flex flex-col gap-4 font-bold text-lg opacity-70">
                 <li>Next.js + React</li>
                 <li>Tailwind CSS</li>
