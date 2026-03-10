@@ -1,6 +1,7 @@
 {
   "name": "curriculo-maker",
   "version": "0.1.0",
+  "description": "A privacy-first, purely local, AI-powered resume adaptation engine.",
   "private": true,
   "scripts": {
     "dev": "next dev",
