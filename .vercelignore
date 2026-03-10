@@ -1,12 +1,23 @@
-# Private files — never deploy
-*.zip
-Resume/
+# ==============================================================================
+# Vercel Ignore List
+# Files and directories here will NOT be uploaded to Vercel's build servers.
+# Use this to keep deployments lightweight and private.
+# ==============================================================================
+
+# Private & Local configs
 .env*
 .env.local
+.DS_Store
+
+# Backups & Documents
+*.zip
+*.tar.gz
+*.rar
 *.docx
 *.pdf
-# QA & Tooling
+
+# QA & Tooling (Not needed in Prod)
 playwright-report/
 test-results/
 tests/
-antigravity-awesome-skills/
+playwright.config.ts
