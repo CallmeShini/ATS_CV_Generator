@@ -5,3 +5,8 @@ Resume/
 .env.local
 *.docx
 *.pdf
+# QA & Tooling
+playwright-report/
+test-results/
+tests/
+antigravity-awesome-skills/
