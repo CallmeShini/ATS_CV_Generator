@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Currículo Maker — ATS Resume Generator",
-  description: "Motor de otimização de currículos com IA para burlar filtros ATS.",
+  title: "Currículo ATS",
+  description: "Gerador de currículos otimizado para sistemas ATS com foco em conversão e recrutamento técnico.",
 };
 
 export default function RootLayout({

@@ -106,6 +106,78 @@ export default function ProfilePage() {
 
                 <hr className="hr-thick mb-20" />
 
+                {/* ── ACADEMIC & RECOGNITION ──────────────────────────── */}
+                <section className="mb-20">
+                    <h2 className="font-display font-bold text-3xl tracking-tight mb-10 border-b-2 border-[var(--fg)] pb-4">
+                        Reconhecimento & Academia
+                    </h2>
+
+                    <div className="flex flex-col gap-8 mb-12">
+                        <InputField
+                            label="Certificações (Vírgula)"
+                            value={profile.certifications?.join(", ") || ""}
+                            onChange={(v) => setProfile({ certifications: v.split(",").map(s => s.trim()).filter(Boolean) })}
+                            placeholder="AWS Cloud Practitioner, Certified Kubernetes Admin..."
+                        />
+                        <InputField
+                            label="Premiações & Reconhecimento (Vírgula)"
+                            value={profile.awards?.join(", ") || ""}
+                            onChange={(v) => setProfile({ awards: v.split(",").map(s => s.trim()).filter(Boolean) })}
+                            placeholder="1º Lugar Hackathon, Funcionário do Ano 2023..."
+                        />
+                    </div>
+
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 border-b border-[var(--border-light)] pb-2">
+                        <div>
+                            <h3 className="font-display font-bold text-xl tracking-tight">Formação Acadêmica</h3>
+                        </div>
+                        <button
+                            className="inline-flex items-center gap-1 font-mono text-xs uppercase tracking-widest hover:underline focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--fg)] focus-visible:outline-offset-2"
+                            onClick={() => {
+                                const newEdu = [...(profile.education || [])];
+                                newEdu.unshift({
+                                    institution: "Nova Instituição",
+                                    degree: "Diploma",
+                                    period: "2020 - 2024"
+                                });
+                                setProfile({ education: newEdu });
+                            }}
+                        >
+                            <Plus size={12} strokeWidth={1.5} />
+                            Adicionar Formação
+                        </button>
+                    </div>
+
+                    <div className="flex flex-col gap-6">
+                        {(profile.education || []).map((edu, idx) => (
+                            <article key={idx} className="border border-[var(--fg)] p-4 relative bg-[var(--bg)] flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+                                    <InputField label="Instituição" value={edu.institution} size="sm"
+                                        onChange={(v) => { const n = [...profile.education]; n[idx].institution = v; setProfile({ education: n }); }} />
+                                    <InputField label="Grau" value={edu.degree} size="sm"
+                                        onChange={(v) => { const n = [...profile.education]; n[idx].degree = v; setProfile({ education: n }); }} />
+                                    <InputField label="Período" value={edu.period} size="sm" mono
+                                        onChange={(v) => { const n = [...profile.education]; n[idx].period = v; setProfile({ education: n }); }} />
+                                </div>
+                                <button
+                                    className="text-[var(--muted-foreground)] hover:text-[var(--fg)] transition-colors duration-100 flex-shrink-0 focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--fg)] focus-visible:outline-offset-2"
+                                    onClick={() => {
+                                        const n = [...profile.education];
+                                        n.splice(idx, 1);
+                                        setProfile({ education: n });
+                                    }}
+                                    title="Deletar"
+                                    aria-label="Deletar formação"
+                                >
+                                    <X size={16} strokeWidth={1.5} />
+                                </button>
+                            </article>
+                        ))}
+                    </div>
+                </section>
+
+                <hr className="hr-thick mb-20" />
+
                 {/* ── EXPERIENCE ──────────────────────── */}
                 <section className="mb-20">
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 border-b-2 border-[var(--fg)] pb-4">

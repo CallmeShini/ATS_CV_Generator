@@ -52,6 +52,9 @@ const initialProfile: MasterProfile = {
         "AWS Certified Developer",
         "CS50"
     ],
+    awards: [
+        "1st Place Hackathon 2023"
+    ],
     education: [
         {
             institution: "University Name",

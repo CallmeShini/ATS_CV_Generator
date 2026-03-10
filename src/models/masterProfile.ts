@@ -35,6 +35,7 @@ export const MasterProfileSchema = z.object({
     technologies_possible: z.array(z.string()),
     human_languages: z.array(z.string()),
     certifications: z.array(z.string()),
+    awards: z.array(z.string()),
     education: z.array(EducationSchema),
     experience_master: z.array(ExperienceSchema),
     project_bank: z.array(ProjectSchema),

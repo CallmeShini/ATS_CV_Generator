@@ -76,7 +76,7 @@ export default function MatchPage() {
 
                 {/* Title */}
                 <div className="mb-12">
-                    <p className="font-mono text-xs uppercase tracking-widest text-[var(--muted-foreground)] mb-4">Motor semântico IA</p>
+                    <p className="font-mono text-xs uppercase tracking-widest text-[var(--muted-foreground)] mb-4">Motor de Extração ATS</p>
                     <h1 className="font-display font-black text-5xl lg:text-8xl tracking-tighter leading-none">
                         Job Matcher
                     </h1>
