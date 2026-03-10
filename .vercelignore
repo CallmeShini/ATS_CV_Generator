@@ -1,0 +1,7 @@
+# Private files — never deploy
+*.zip
+Resume/
+.env*
+.env.local
+*.docx
+*.pdf

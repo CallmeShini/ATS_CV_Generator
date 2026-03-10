@@ -1,0 +1,229 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=block');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #FFFFFF;
+    --foreground: #000000;
+    --muted: #F5F5F5;
+    --muted-foreground: #525252;
+    --border: #000000;
+    --border-light: #E5E5E5;
+    --ring: #000000;
+
+    /* Aliases for shorthand */
+    --bg: #FFFFFF;
+    --fg: #000000;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 16px;
+    line-height: 1.625;
+  }
+
+  /* Noise texture — paper-like quality */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    opacity: 0.02;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* Zero radius — architectural precision */
+  * {
+    border-radius: 0px !important;
+  }
+
+  /* Links */
+  a {
+    color: var(--fg);
+    text-decoration: none;
+    transition: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  /* Typography — Serif headlines */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+
+  /* Selection — inverted */
+  ::selection {
+    background-color: var(--fg);
+    color: var(--bg);
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+
+  .font-body {
+    font-family: 'Source Serif 4', Georgia, serif;
+  }
+
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Thick horizontal rules — editorial section dividers */
+  .hr-thick {
+    border: none;
+    height: 4px;
+    background: var(--fg);
+  }
+
+  .hr-ultra {
+    border: none;
+    height: 8px;
+    background: var(--fg);
+  }
+
+  .hr-thin {
+    border: none;
+    height: 1px;
+    background: var(--fg);
+  }
+
+  .hr-hairline {
+    border: none;
+    height: 1px;
+    background: var(--border-light);
+  }
+
+  /* Drop cap — editorial first letter */
+  .drop-cap::first-letter {
+    float: left;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 5rem;
+    line-height: 0.75;
+    padding-right: 0.5rem;
+    padding-top: 0.3rem;
+    font-weight: 900;
+    color: var(--fg);
+    border: 2px solid var(--fg);
+    padding: 0.1em 0.2em;
+    margin-right: 0.3em;
+  }
+
+  /* Inversion hover — cards */
+  .invert-hover {
+    transition: background-color 100ms, color 100ms;
+  }
+
+  .invert-hover:hover {
+    background-color: var(--fg) !important;
+    color: var(--bg) !important;
+  }
+}
+
+/* ── Focus states ────────────────────────── */
+:focus-visible {
+  outline: 3px solid var(--fg);
+  outline-offset: 3px;
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+  border-bottom-width: 4px !important;
+  border-color: var(--fg) !important;
+}
+
+/* ── Horizontal line texture layer ──────── */
+.texture-lines::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(0deg,
+      transparent,
+      transparent 1px,
+      #000 1px,
+      #000 2px);
+  background-size: 100% 4px;
+  opacity: 0.015;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Grid texture ──────────────────────── */
+.texture-grid::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(#00000008 1px, transparent 1px),
+    linear-gradient(90deg, #00000008 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Inverted texture (for black bgs) ──── */
+.texture-invert::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(90deg,
+      transparent,
+      transparent 1px,
+      #fff 1px,
+      #fff 2px);
+  background-size: 4px 100%;
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Grayscale images ──────────────────── */
+img {
+  filter: grayscale(100%);
+  transition: filter 300ms;
+}
+
+img:hover {
+  filter: grayscale(0%);
+}
+
+/* ── Print rules ───────────────────────── */
+@media print {
+  @page {
+    margin: 0;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  body::after {
+    display: none !important;
+  }
+
+  .print\:hidden {
+    display: none !important;
+  }
+
+  img {
+    filter: none !important;
+  }
+}
