@@ -1,6 +1,29 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage, StateStorage } from "zustand/middleware";
 import { MasterProfile } from "../models/masterProfile";
+import CryptoJS from "crypto-js";
+
+// Add AES Encryption to local storage to prevent XSS sniffing
+const ENCRYPTION_KEY = process.env.NEXT_PUBLIC_STORAGE_SECRET || "fallback-curriculo-secret-key-999";
+
+const encryptedStorage: StateStorage = {
+    getItem: (name: string) => {
+        const str = localStorage.getItem(name);
+        if (!str) return null;
+        try {
+            const bytes = CryptoJS.AES.decrypt(str, ENCRYPTION_KEY);
+            const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+            return decrypted || null;
+        } catch {
+            return null;
+        }
+    },
+    setItem: (name: string, value: string) => {
+        const encrypted = CryptoJS.AES.encrypt(value, ENCRYPTION_KEY).toString();
+        localStorage.setItem(name, encrypted);
+    },
+    removeItem: (name: string) => localStorage.removeItem(name),
+};
 
 const initialProfile: MasterProfile = {
     name: "John Doe",
@@ -92,6 +115,7 @@ export const useMasterProfile = create<MasterProfileState>()(
         }),
         {
             name: "master-profile-storage",
+            storage: createJSONStorage(() => encryptedStorage),
         }
     )
 );

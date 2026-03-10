@@ -1,6 +1,16 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { NextResponse } from "next/server";
 import { z } from 'zod';
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+
+const ratelimit = (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN)
+    ? new Ratelimit({
+        redis: Redis.fromEnv(),
+        limiter: Ratelimit.slidingWindow(5, "1 m"),
+        analytics: true,
+    })
+    : null;
 
 const GeneratePayloadSchema = z.object({
     jobDescription: z.string().min(10).max(20000),
@@ -11,7 +21,16 @@ const GeneratePayloadSchema = z.object({
 
 export async function POST(req: Request) {
     try {
-        // 1. Basic Origin Validation (CSRF & Bot Abuse Mitigation)
+        // 1. Rate Limiting (Denial of Wallet protection)
+        if (ratelimit) {
+            const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "127.0.0.1";
+            const { success } = await ratelimit.limit(ip);
+            if (!success) {
+                return NextResponse.json({ error: "Rate limit exceeded. Please try again later." }, { status: 429 });
+            }
+        }
+
+        // 2. Basic Origin Validation (CSRF & Bot Abuse Mitigation)
         const origin = req.headers.get("origin");
         const host = req.headers.get("host");
 

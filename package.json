@@ -12,7 +12,10 @@
   "dependencies": {
     "@ai-sdk/groq": "^3.0.29",
     "@google/genai": "^1.44.0",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.36.4",
     "ai": "^6.0.116",
+    "crypto-js": "^4.2.0",
     "lucide-react": "^0.577.0",
     "next": "16.1.6",
     "react": "19.2.3",
@@ -23,6 +26,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
+    "@types/crypto-js": "^4.2.2",
     "@types/node": "^20.19.37",
     "@types/react": "^19",
     "@types/react-dom": "^19",
