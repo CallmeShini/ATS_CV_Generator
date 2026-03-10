@@ -1,5 +1,13 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { NextResponse } from "next/server";
+import { z } from 'zod';
+
+const GeneratePayloadSchema = z.object({
+    jobDescription: z.string().min(10).max(20000),
+    targetRole: z.string().optional(),
+    targetCompany: z.string().optional(),
+    masterProfile: z.record(z.string(), z.any()).refine(val => Object.keys(val).length > 0, { message: "Profile cannot be empty" })
+});
 
 export async function POST(req: Request) {
     try {
@@ -19,12 +27,15 @@ export async function POST(req: Request) {
         }
 
         const ai = new GoogleGenAI({ apiKey });
-        const { jobDescription, targetRole, targetCompany, masterProfile } = await req.json();
+        const rawJson = await req.json();
 
-        // 2. Input Validation (Types and lengths)
-        if (!jobDescription || typeof jobDescription !== "string" || !masterProfile || typeof masterProfile !== "object") {
-            return NextResponse.json({ error: "Invalid input payload" }, { status: 400 });
+        // 2. Strict Input Validation via Zod
+        const parsed = GeneratePayloadSchema.safeParse(rawJson);
+        if (!parsed.success) {
+            return NextResponse.json({ error: "Invalid input payload", details: parsed.error.format() }, { status: 400 });
         }
+
+        const { jobDescription, targetRole, targetCompany, masterProfile } = parsed.data;
 
         if (jobDescription.length > 20000) {
             return NextResponse.json({ error: "Job description is too large." }, { status: 400 });

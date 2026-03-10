@@ -1,6 +1,12 @@
 import { createGroq } from "@ai-sdk/groq";
 import { generateText } from "ai";
 import { NextResponse } from "next/server";
+import { z } from 'zod';
+
+const MatchPayloadSchema = z.object({
+    jobDescription: z.string().min(10).max(20000),
+    userProfile: z.record(z.string(), z.any()).refine(val => Object.keys(val).length > 0, { message: "Profile cannot be empty" })
+});
 
 // This is a stateless processing endpoint
 export const maxDuration = 60; // Allow sufficient LLM reasoning time
@@ -17,12 +23,15 @@ export async function POST(req: Request) {
             }
         }
 
-        const { jobDescription, userProfile } = await req.json();
+        const rawJson = await req.json();
 
-        // 2. Input Validation (Types and lengths)
-        if (!jobDescription || typeof jobDescription !== "string" || !userProfile || typeof userProfile !== "object") {
-            return NextResponse.json({ error: "Invalid input payload" }, { status: 400 });
+        // 2. Strict Input Validation via Zod
+        const parsed = MatchPayloadSchema.safeParse(rawJson);
+        if (!parsed.success) {
+            return NextResponse.json({ error: "Invalid input payload", details: parsed.error.format() }, { status: 400 });
         }
+
+        const { jobDescription, userProfile } = parsed.data;
 
         if (jobDescription.length > 20000) {
             return NextResponse.json({ error: "Job description is too large." }, { status: 400 });
